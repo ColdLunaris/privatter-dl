@@ -1,15 +1,19 @@
+from http import cookiejar
 import requests, argparse, os
 from termcolor import colored
 from bs4 import BeautifulSoup
+from http.cookiejar import MozillaCookieJar
 
 def parse_args():
     p = argparse.ArgumentParser()
 
     p.add_argument("-d", dest="directory", required=False, help="destination where all images will be saved")
-    p.add_argument("-c", dest="cookie", required=True, help="path to authenticated cookie-file")
+    #p.add_argument("-c", dest="cookie", required=True, help="path to authenticated cookie-file")
     p.add_argument("-u", dest="url", required=True, help="url for profile to be downloaded")
     p.add_argument("-v", dest="verbose", required=False, default=True, help="specifies verbosity to true or false. Default true")
-    
+    p.add_argument("-U", dest="username", required=True, help="Username for login to Privatter")
+    p.add_argument("-P", dest="password", required=True, help="Password for login to Privatter")
+
     return p.parse_args()
 
 def create_directory(url, dir):
@@ -40,22 +44,22 @@ def save_image(link, path, v):
         if v is True:
             print(colored(path, 'green'))
 
-def import_cookies(cookie):
-    with open(cookie) as c:
-        for line in c:
-            if 'PHPSESSID' in line:
-                return str(line.split('\t')[5] + '=' + line.split('\t')[6].replace('\n', ''))
-
-def create_session(cookie):
+def create_session(username, password):
     s = requests.Session()
 
-    session_id = import_cookies(cookie)
     s.headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36',
-        'Host': 'privatter.net',
-        'Cookie': session_id,
+        'Host': 'privatter.net'
     }
+
+    payload = {
+        'mode': 'login',
+        'login_id': username,
+        'password': password
+    }
+
+    s.post('https://privatter.net/login_pass', data=payload)
 
     return s
 
@@ -85,7 +89,7 @@ def get_image_direct_link(s, url, path, v):
 if __name__ == "__main__":
     a = parse_args()
 
-    with create_session(a.cookie) as s:
+    with create_session(a.username, a.password) as s:
         path = create_directory(a.url, a.directory)
         links = get_image_sites(s, a.url)
         
