@@ -1,6 +1,4 @@
 import requests, argparse, os
-from http.cookiejar import MozillaCookieJar
-from requests.sessions import session
 from termcolor import colored
 from bs4 import BeautifulSoup
 
@@ -86,7 +84,6 @@ def get_image_direct_link(s, url, path, v):
 
 if __name__ == "__main__":
     a = parse_args()
-    
 
     with create_session(a.cookie) as s:
         path = create_directory(a.url, a.directory)
