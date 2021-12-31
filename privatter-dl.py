@@ -1,14 +1,11 @@
-from http import cookiejar
 import requests, argparse, os
 from termcolor import colored
 from bs4 import BeautifulSoup
-from http.cookiejar import MozillaCookieJar
 
 def parse_args():
     p = argparse.ArgumentParser()
 
     p.add_argument("-d", dest="directory", required=False, help="destination where all images will be saved")
-    #p.add_argument("-c", dest="cookie", required=True, help="path to authenticated cookie-file")
     p.add_argument("-u", dest="url", required=True, help="url for profile to be downloaded")
     p.add_argument("-v", dest="verbose", required=False, default=True, help="specifies verbosity to true or false. Default true")
     p.add_argument("-U", dest="username", required=True, help="Username for login to Privatter")
