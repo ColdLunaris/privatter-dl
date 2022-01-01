@@ -66,10 +66,7 @@ def get_image_sites(s, url):
     soup = BeautifulSoup(r.text, 'html.parser')
     pages = soup.findAll(class_="pull-left")
 
-    links = []
-    for page in pages:
-        link = 'https://privatter.net' + str(page).split('href="')[1].split('">')[0]
-        links.append(link)
+    links = ['https://privatter.net' + str(page).split('href="')[1].split('">')[0] for page in pages]
 
     return links[::-1]
 
