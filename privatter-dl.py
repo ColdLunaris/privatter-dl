@@ -18,7 +18,7 @@ def create_directory(url, dir):
     if not p.endswith('/'):
         p = p + '/'
 
-    # Get username from supplied url
+    # Get username from supplied url. Create destination directory with it
     p = p + url.split('/')[-1].split('#')[0]
 
     if not os.path.exists(p):
@@ -29,6 +29,8 @@ def create_directory(url, dir):
 def save_image(link, path, v):
     name = link.rsplit('/', 1)[-1]
     path = path + '/' + name
+
+    # Privatter, unlike poipiku, does not host images themselves. No auth needed once URLs have been found
     r = requests.get(link, stream=True)
 
     if r.status_code == 200 and not os.path.exists(path):
@@ -50,6 +52,8 @@ def create_session(username, password):
         'Host': 'privatter.net'
     }
 
+    # Probably a really bad way to handle passwords... But we need to generate a unique login per session.
+    # Cookies CAN be used, but it's much easier to just use plain username and password
     payload = {
         'mode': 'login',
         'login_id': username,
