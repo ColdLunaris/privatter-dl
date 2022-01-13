@@ -1,4 +1,4 @@
-import requests, argparse, os
+import requests, argparse, os, asyncio, concurrent.futures
 from termcolor import colored
 from bs4 import BeautifulSoup
 
@@ -10,6 +10,7 @@ def parse_args():
     p.add_argument("-v", dest="verbose", required=False, default=True, help="specifies verbosity to true or false. Default true")
     p.add_argument("-U", dest="username", required=True, help="Username for login to Privatter")
     p.add_argument("-P", dest="password", required=True, help="Password for login to Privatter")
+    p.add_argument("-t", dest="threads", required=False, help="Amount of threads to spawn while downloading. Default is 1")
 
     return p.parse_args()
 
@@ -30,18 +31,20 @@ def save_image(link, path, v):
     name = link.rsplit('/', 1)[-1]
     path = path + '/' + name
 
+    if os.path.exists(path):
+        if v is True:
+            print(colored(path, 'green'))
+        return
+
     # Privatter, unlike poipiku, does not host images themselves. No auth needed once URLs have been found
     r = requests.get(link, stream=True)
 
-    if r.status_code == 200 and not os.path.exists(path):
+    if r.status_code == 200:
         with open(path, 'wb') as f:
             for c in r:
                 f.write(c)
         if v is True:
             print(colored(path, 'white'))
-    else:
-        if v is True:
-            print(colored(path, 'green'))
 
 def create_session(username, password):
     s = requests.Session()
@@ -84,12 +87,31 @@ def get_image_direct_link(s, url, path, v):
         link = str(link).split('href="')[1].split('"')[0]
         save_image(link, path, v)
 
-if __name__ == "__main__":
+async def main():
     a = parse_args()
 
     with create_session(a.username, a.password) as s:
         path = create_directory(a.url, a.directory)
         links = get_image_sites(s, a.url)
-        
-        for link in links:
-            get_image_direct_link(s, link, path, a.verbose)
+
+        threads = 1 if a.threads is None else int(a.threads)
+        with concurrent.futures.ThreadPoolExecutor(threads) as executor:
+            loop = asyncio.get_event_loop()
+
+            tasks = [
+                loop.run_in_executor(
+                    executor,
+                    get_image_direct_link,
+                    *(s, link, path, a.verbose)
+                )
+                for link in links
+            ]
+
+            for response in await asyncio.gather(*tasks):
+                pass
+
+if __name__ == "__main__":
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())
+    loop.close()
