@@ -26,6 +26,7 @@ If you still get an error for missing modules, that's when Google helps you out.
 | `-U LOGIN_ID` **REQUIRED** | Specify username for Privatter-login |
 | `-P PASSWORD` **REQUIRED** | Specify password for Privatter-login |
 | `-u URL` **REQUIRED**| Specifies which link to look for images | 
+| `-t THREADS` | Specifies how many threads to use for downloads. Default is 1 | 
 
 `python ./privatter-dl.py [-v VALUE] [-d PATH] -U LOGIN_ID -P PASSWORD -u URL`
 
@@ -40,4 +41,4 @@ If you still get an error for missing modules, that's when Google helps you out.
 
 ### Example
 
-`python ./privatter-dl.py -d '/mnt/tank/privatter-archive/' -U 'NotARealUsername' -P 'NotARealPassword' -u 'https://privatter.net/ID HERE/' -v True`
+`python ./privatter-dl.py -d '/mnt/tank/privatter-archive/' -U 'NotARealUsername' -P 'NotARealPassword' -u 'https://privatter.net/ID HERE/' -v True -t 10`
